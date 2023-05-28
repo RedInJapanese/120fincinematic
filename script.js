@@ -25,7 +25,14 @@ class Title extends Phaser.Scene {
         playText.on('pointerdown', () => {
             this.scene.start('map');
         });
-
+        this.tweens.add({
+            targets: this.title,
+            x: '+=' + 100,
+            repeat: 2,
+            yoyo: true,
+            ease: 'Sine.inOut',
+            duration: 100
+        });
         // const space = this.add.image(200, 0, 'space');
         // //space.scale(.5);
         // space.setOrigin(0);
