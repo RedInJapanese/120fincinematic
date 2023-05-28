@@ -1,2 +1,5 @@
-# 120fincinematic
-final cinmeatic scene for cmpm120 final project 
+# sceneflowproto
+
+Code for the opening cinmatic section of our CMPM120 final
+
+Credit for scenes 'Title' to 'Level13' go to Brayden Smith
