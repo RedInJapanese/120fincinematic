@@ -10,6 +10,10 @@ class Title extends Phaser.Scene {
             frameWidth: 32,
             frameHeight: 32,
         });
+        this.load.spritesheet('idle', 'doc.png', {
+            frameWidth: 32,
+            frameHeight: 32,
+        });
     }
     create() {
         this.cameras.main.setBackgroundColor('#1D4625');
@@ -17,16 +21,31 @@ class Title extends Phaser.Scene {
         this.scenenum = this.add.text(50, 50, "title")
 
         this.title = this.add.image(300, 200, 'title');
-        
-        this.imageObject = this.add.sprite(
+        this.still = this.add.sprite(
+            400,//x
+            400,//y
+            'idle',//imagename
+        );
+        this.still.setDepth(1);
+        this.still.setScale(3); //resize
+        this.anims.create({
+            key: 'idle',
+            frames: this.anims.generateFrameNumbers('idle', {
+                start: 0,
+                end: 1
+            }),
+            frameRate: 7,
+            repeat: -1
+        });
+        this.still.anims.play('idle', true);
+        this.still.setVisible(false);
+        this.run = this.add.sprite(
             400,//x
             400,//y
             'run',//imagename
         );
-
-        //spritesheet code credit goes to Brayden Smith(https://bsmit104.github.io/spritetest/)
-        this.imageObject.setDepth(1);
-        this.imageObject.setScale(3); //resize
+        this.run.setDepth(1);
+        this.run.setScale(3); //resize
         this.anims.create({
             key: 'run',
             frames: this.anims.generateFrameNumbers('run', {
@@ -36,8 +55,9 @@ class Title extends Phaser.Scene {
             frameRate: 10,
             repeat: -1
         });
-        this.imageObject.anims.play('run', true);
+        this.run.anims.play('run', true);
 
+        this.imageObject = this.run
         const cursor = {
             x: 0,
             y: 0
@@ -47,7 +67,8 @@ class Title extends Phaser.Scene {
         {
             cursor.x = event.clientX 
             cursor.y = event.clientY 
-
+            this.still.x = cursor.x + 100
+            this.run.x = cursor.x + 100
             this.imageObject.x = cursor.x+100
         })
 
@@ -75,11 +96,24 @@ class Title extends Phaser.Scene {
     }
     update(){
         if(this.imageObject.x > this.prev){
+            this.still.setVisible(false)
+            this.run.setVisible(true)
+            this.imageObject = this.run
             this.imageObject.flipX = false
         }
         if(this.imageObject.x < this.prev){
+            this.still.setVisible(false)
+            this.run.setVisible(true)
+            this.imageObject = this.run
             this.imageObject.flipX = true
         }
+        if(this.prev == this.imageObject.x) {
+            this.run.setVisible(false)
+            this.still.setVisible(true)
+            this.imageObject = this.still
+        }
+
+  
         this.prev = this.imageObject.x
     }
 }
