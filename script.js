@@ -5,6 +5,11 @@ class Title extends Phaser.Scene {
     preload() {
         this.load.path = "./assets/";
         this.load.image('title', 'title.png');
+        this.load.image('play', 'resume.png');
+        this.load.spritesheet('run', 'docrun.png', {
+            frameWidth: 32,
+            frameHeight: 32,
+        });
     }
     create() {
         this.cameras.main.setBackgroundColor('#1D4625');
@@ -12,19 +17,40 @@ class Title extends Phaser.Scene {
         this.scenenum = this.add.text(50, 50, "title")
 
         this.title = this.add.image(300, 200, 'title');
+        
+        this.imageObject = this.add.sprite(
+            400,//x
+            400,//y
+            'run',//imagename
+        );
 
-        const playText = this.add.text(350, 400, 'PLAY', { fontSize: '40px', fill: '#fff' });
-        //playText.setDepth(1);
-        playText.setInteractive();
-        playText.on('pointerover', () => {
-            playText.setStyle({ fill: '#ff0' });
+        //spritesheet code credit goes to Brayden Smith(https://bsmit104.github.io/spritetest/)
+        this.imageObject.setDepth(1);
+        this.imageObject.setScale(3); //resize
+        this.anims.create({
+            key: 'run',
+            frames: this.anims.generateFrameNumbers('run', {
+                start: 0,
+                end: 9
+            }),
+            frameRate: 10,
+            repeat: -1
         });
-        playText.on('pointerout', () => {
-            playText.setStyle({ fill: '#fff' });
-        });
-        playText.on('pointerdown', () => {
-            this.scene.start('map');
-        });
+        this.imageObject.anims.play('run', true);
+
+        const cursor = {
+            x: 0,
+            y: 0
+        }
+
+        window.addEventListener('mousemove', (event) =>
+        {
+            cursor.x = event.clientX 
+            cursor.y = event.clientY 
+
+            this.imageObject.x = cursor.x+100
+        })
+
         this.tweens.add({
             targets: this.title,
             x: '+=' + 100,
@@ -33,12 +59,28 @@ class Title extends Phaser.Scene {
             ease: 'Sine.inOut',
             duration: 100
         });
+        this.play = this.add.image(300, 400, 'play').setInteractive()
+        .on('pointerover', () => this.play.setAlpha(0.4))
+        .on('pointerout', () => this.play.setAlpha(1))
+        .on('pointerdown', () => {
+            this.scene.start('map')
+        });
+        this.prev = 0
         // const space = this.add.image(200, 0, 'space');
         // //space.scale(.5);
         // space.setOrigin(0);
         // space.setDepth(0);
 
         // this.imageObject.background = this.back;
+    }
+    update(){
+        if(this.imageObject.x > this.prev){
+            this.imageObject.flipX = false
+        }
+        if(this.imageObject.x < this.prev){
+            this.imageObject.flipX = true
+        }
+        this.prev = this.imageObject.x
     }
 }
 
@@ -343,9 +385,58 @@ class Level3 extends Phaser.Scene {
     }
 
 }
-class Beg extends Phaser.Scene {
+class NonInteractive extends Phaser.Scene {
     constructor() {
-        super('Beg');
+        super('NonInteractive');
+    }
+    preload(){
+        this.load.path = "./assets/";
+        this.load.image('non', 'doctime_logo.png');
+    }
+    create(){
+        this.time.addEvent({
+            delay: 3000, 
+            loop:false,
+            callback: () => {
+                this.scene.start("title")
+            }
+        })
+        const instruction = this.add.text(350, 400, 'Hold down click to skip', { fontSize: '10px', fill: '#fff' });
+        this.non = this.add.image(300, 200, 'non');
+        this.input.on('pointerup', (pointer) => {
+            let duration = pointer.getDuration();
+            if(duration >= 500){
+                this.scene.start('title')
+            }
+            console.log(duration)
+        });
+        this.cameras.main.fadeIn(6000);
+        this.tweens.chain({
+            targets: this.non,
+            tweens: [
+                {
+                    x: '+=' + 100,
+                    repeat: 2,
+                    yoyo: true,
+                    ease: 'Sine.inOut',
+                    duration: 100
+                },
+                {
+                    y: '+=' + 100,
+                    repeat: 2,
+                    yoyo: true,
+                    ease: 'Sine.inOut',
+                    duration: 100 
+                }
+            ]
+        });
+    }
+    update(){
+    }
+}
+class Names extends Phaser.Scene {
+    constructor() {
+        super('Names');
     }
     preload(){
 
@@ -357,13 +448,13 @@ class Beg extends Phaser.Scene {
         this.add.text(205, 200, "Akash Basu,").setFontSize(30);
         this.add.text(150, 250, "and Connor Green").setFontSize(30);
         this.add.text(250, 300, "present").setFontSize(20);
-        this.input.on('pointerdown', () => this.scene.start('title'));
+        this.input.on('pointerdown', () => this.scene.start('NonInteractive'));
         this.cameras.main.fadeIn(6000);
         this.time.addEvent({
             delay: 3000, 
             loop:false,
             callback: () => {
-                this.scene.start("title")
+                this.scene.start("NonInteractive")
             }
         })
     }
@@ -378,7 +469,7 @@ new Phaser.Game({
     height: 480,
     //backgroundColor: 0x2a5825,
     //scene: [Title, Map, Pause, Settings, Level1, Level2, Level3],
-    scene: [Beg, Title, Map, Pause, Settings, Level1, Level2, Level3],
+    scene: [Names, NonInteractive, Title, Map, Pause, Settings, Level1, Level2, Level3],
 })
 
 
